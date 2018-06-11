@@ -1,0 +1,38 @@
+<template name="adminThemeCustom">
+	<div class="main-content-flex">
+		<section class="page-container page-list flex-tab-main-content">
+			{{> header sectionName="Custom_Themes"}}
+			<div class="content">
+				{{#unless hasPermission 'view-privileged-setting'}}
+					<p>{{_ "You_are_not_authorized_to_view_this_page"}}</p>
+				{{else}}
+					<a href="{{pathFor "theme-custom"}}" class="button primary new-role">{{_ "New_Theme"}}</a>
+
+					<div class="rocket-form">
+						<div class="section">
+							<div class="admin-integrations-new-panel">
+								{{#each customthemes}}
+									<a href="{{pathFor "theme-custom" id=_id}}">
+										<div class="admin-integrations-new-item">
+											<div class="admin-integrations-new-item-body">
+												<div class="admin-integrations-new-item-title">
+													{{name}}
+												</div>
+											</div>
+											<i class="icon-angle-right"></i>
+										</div>
+									</a>
+								{{else}}
+									<h1>{{_ "There_are_no_themes"}}</h1>
+								{{/each}}
+							</div>
+						</div>
+					</div>
+				{{/unless}}
+			</div>
+		</section>
+		{{#with flexData}}
+			{{> flexTabBar}}
+		{{/with}}
+	</div>
+</template>

@@ -385,7 +385,7 @@
 	--status-away: var(--rc-color-darktheme-alert);
 	--status-busy: var(--rc-color-darktheme-error);
 	--status-invisible: var(--color-gray-medium);
-	--status-invisible-sidebar: var(--rc-color-darktheme-primary-darkest);
+	--status-invisible-sidebar: #AAAAAA;
 
 	/*
 	* Forms - Button
