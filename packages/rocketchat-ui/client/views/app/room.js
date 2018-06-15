@@ -122,6 +122,52 @@ const mountPopover = (e, i, outerContext) => {
 	popover.open(config);
 };
 
+const openMessageMenu = (e, i, caller) => {
+	let target = $(e.target).parents('.message');
+	if (!target.length && $(e.target).hasClass('.message')) {
+		target = $(e.target);
+	}
+
+	let context = target.data('context');
+	if (!context) {
+		context = 'message';
+	}
+
+	console.log(caller._arguments);
+
+	const [, message] = caller._arguments;
+	const allItems = RocketChat.MessageAction.getButtons(message, context, 'menu').map(item => {
+		return {
+			icon: item.icon,
+			name: t(item.label),
+			type: 'message-action',
+			id: item.id,
+			modifier: item.color
+		};
+	});
+	const [items, deleteItem] = allItems.reduce((result, value) => (result[value.id === 'delete-message' ? 1 : 0].push(value), result), [[], []]);
+	const groups = [{ items }];
+
+	if (deleteItem.length) {
+		groups.push({ items: deleteItem });
+	}
+
+	const config = {
+		columns: [
+			{
+				groups
+			}
+		],
+		instance: i,
+		data: this,
+		currentTarget: e.currentTarget,
+		activeElement: target[0],
+		onRendered: () => new Clipboard('.rc-popover__item')
+	};
+
+	popover.open(config);
+};
+
 Template.room.helpers({
 	isTranslated() {
 		const sub = ChatSubscription.findOne({ rid: this._id }, { fields: { autoTranslate: 1, autoTranslateLanguage: 1 } });
@@ -565,42 +611,15 @@ Template.room.events({
 		chatMessages[RocketChat.openedRoom].input.focus();
 	},
 	'click .message-actions__menu'(e, i) {
-		let context = $(e.target).parents('.message').data('context');
-		if (!context) {
-			context = 'message';
-		}
-
-		const [, message] = this._arguments;
-		const allItems = RocketChat.MessageAction.getButtons(message, context, 'menu').map(item => {
-			return {
-				icon: item.icon,
-				name: t(item.label),
-				type: 'message-action',
-				id: item.id,
-				modifier: item.color
-			};
-		});
-		const [items, deleteItem] = allItems.reduce((result, value) => (result[value.id === 'delete-message' ? 1 : 0].push(value), result), [[], []]);
-		const groups = [{ items }];
-
-		if (deleteItem.length) {
-			groups.push({ items: deleteItem });
-		}
-
-		const config = {
-			columns: [
-				{
-					groups
-				}
-			],
-			instance: i,
-			data: this,
-			currentTarget: e.currentTarget,
-			activeElement: $(e.currentTarget).parents('.message')[0],
-			onRendered: () => new Clipboard('.rc-popover__item')
-		};
-
-		popover.open(config);
+		openMessageMenu(e, i, this);
+	},
+	'mousedown .message'(e, i) {
+		if (e.button == 2) {
+            openMessageMenu(e, i, this);
+        }
+	},
+	'contextmenu .message'() {
+		return false;
 	},
 	'click .time a'(e) {
 		e.preventDefault();
